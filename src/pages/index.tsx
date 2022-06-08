@@ -43,6 +43,7 @@ const Home: NextPage = () => {
 
   const { data: allMeetings, isLoading } = useQuery('AllMeetings', async () => {
     const { data } = await api.get('/whereby/all')
+    console.log(data)
 
     return data
   }, {

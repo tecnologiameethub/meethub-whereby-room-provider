@@ -15,7 +15,7 @@ const handler = nextConnect<NextApiRequest, NextApiResponse>({
 })
 
 handler.get(async (request, response) => {
-  const { data } = await wherebyApi.get('/')
+  const { data } = await wherebyApi.get('/?limit=100',)
 
   return response.status(200).json(data.results)
 })
