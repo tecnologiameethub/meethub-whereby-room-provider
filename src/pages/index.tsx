@@ -13,6 +13,8 @@ import {
   useDisclosure,
   useToast
 } from '@chakra-ui/react'
+import { format, subHours } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useState } from 'react'
@@ -24,7 +26,7 @@ import { MeetDeleteModal } from '../Components/MeetDeleteModal'
 import { api } from '../services/api'
 
 type MeetingProps = {
-  endDate: string
+  endDate: Date
   roomUrl: string
   meetingId: string
 }
@@ -43,7 +45,6 @@ const Home: NextPage = () => {
 
   const { data: allMeetings, isLoading } = useQuery('AllMeetings', async () => {
     const { data } = await api.get('/whereby/all')
-    console.log(data)
 
     return data
   }, {
@@ -63,14 +64,11 @@ const Home: NextPage = () => {
     await handler()
   }
 
-  const handleFormatDate = (value?: string) => {
-    return new Date(String(value)).toLocaleDateString('pt-BR', {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: 'numeric',
-      minute: 'numeric'
-    })
+  const handleFormatDate = (value: Date | string) => {
+    // return format(new Date(String(value)))
+    const date = new Date(value)
+    const subHourDate = subHours(date, 3)
+    return format(subHourDate, 'd MMMM yyyy HH:mm', { locale: ptBR })
   }
 
   const handleDeleteModal = async (value: string) => {
@@ -175,7 +173,7 @@ const Home: NextPage = () => {
                         fontSize={'lg'}
                         fontWeight={'semibold'}
                       >
-                        {handleFormatDate(meet.endDate)}
+                        {handleFormatDate(meet.endDate) + 'h'}
                       </Heading>
                     </Box>
                   </Flex>
