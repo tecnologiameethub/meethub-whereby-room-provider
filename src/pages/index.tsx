@@ -24,7 +24,6 @@ import { MeetDeleteModal } from '../Components/MeetDeleteModal'
 import { api } from '../services/api'
 
 type MeetingProps = {
-  startDate: string
   endDate: string
   roomUrl: string
   meetingId: string
@@ -63,8 +62,8 @@ const Home: NextPage = () => {
     await handler()
   }
 
-  const handleFormatDate = (value: string) => {
-    return new Date(value).toLocaleDateString('pt-BR', {
+  const handleFormatDate = (value?: string) => {
+    return new Date(String(value)).toLocaleDateString('pt-BR', {
       year: "numeric",
       month: "numeric",
       day: "numeric",
@@ -165,19 +164,6 @@ const Home: NextPage = () => {
                     gap={8}
                     my={4}
                   >
-                    <Box>
-                      <Text
-                        color={'gray.400'}
-                      >
-                        Criação da sala
-                      </Text>
-                      <Heading
-                        fontSize={'lg'}
-                        fontWeight={'semibold'}
-                      >
-                        {handleFormatDate(meet.startDate)}
-                      </Heading>
-                    </Box>
                     <Box>
                       <Text
                         color={'gray.400'}
