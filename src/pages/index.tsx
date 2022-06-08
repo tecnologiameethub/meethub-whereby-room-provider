@@ -13,7 +13,7 @@ import {
   useDisclosure,
   useToast
 } from '@chakra-ui/react'
-import { format, subHours } from 'date-fns'
+import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -67,8 +67,7 @@ const Home: NextPage = () => {
   const handleFormatDate = (value: Date | string) => {
     // return format(new Date(String(value)))
     const date = new Date(value)
-    const subHourDate = subHours(date, 3)
-    return format(subHourDate, 'd MMMM yyyy HH:mm', { locale: ptBR })
+    return format(date, 'd MMMM yyyy HH:mm', { locale: ptBR })
   }
 
   const handleDeleteModal = async (value: string) => {
