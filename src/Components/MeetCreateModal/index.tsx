@@ -1,4 +1,19 @@
-import { Box, Button, Flex, Heading, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalOverlay,
+  useToast
+} from '@chakra-ui/react'
+import { useState } from 'react'
 import { useMutation } from 'react-query'
 import { queryClient } from '../../pages/_app'
 import { api } from '../../services/api'
@@ -6,27 +21,29 @@ import { api } from '../../services/api'
 type CreationModalProps = {
   isOpen: boolean
   onClose: () => void
-  meetId: string
 }
 
-export function MeetCreateModal({ isOpen, onClose, meetId }: CreationModalProps) {
+export function MeetCreateModal({ isOpen, onClose }: CreationModalProps) {
   const toast = useToast()
+  const [endDate, setEndDate] = useState('')
 
   const mutation = useMutation(async (value: string) => {
-    await api.delete(`/whereby/delete?meetingId=${value}`)
+    await api.post('/whereby/create', {
+      endDate: value
+    })
   }, {
     onSuccess: () => {
       toast({
         status: 'info',
-        title: 'Sala excluída com sucesso'
+        title: 'Sala criada com sucesso'
       })
       onClose()
       queryClient.invalidateQueries('AllMeetings')
     }
   })
 
-  const handleDeleteMeet = (value: string) => {
-    mutation.mutateAsync(value)
+  const handleCreateMeet = () => {
+    mutation.mutateAsync(endDate)
   }
 
   return (
@@ -40,28 +57,29 @@ export function MeetCreateModal({ isOpen, onClose, meetId }: CreationModalProps)
               fontSize={'2xl'}
               mb={8}
             >
-              Você tem certeza quer exlcuir a sala?
+              Criar nova sala
             </Heading>
-            <Flex
-              justify={'space-between'}
-              gap={8}
-            >
-              <Button
-                background={'red.500'}
-                _hover={{
-                  bg: 'red.500'
-                }}
-                color={'white'}
-                onClick={() => handleDeleteMeet(meetId)}
+            <Box>
+              <FormControl>
+                <FormLabel htmlFor='endDate'>Data e hora d término</FormLabel>
+                <Input
+                  name={'enDate'}
+                  type='datetime-local'
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </FormControl>
+              <Flex
+                width={'100%'}
+                justify={'flex-end'}
+                my={8}
               >
-                Tenho certeza. Excluir.
-              </Button>
-              <Button
-                onClick={onClose}
-              >
-                Não quero exlcuir
-              </Button>
-            </Flex>
+                <Button
+                  onClick={handleCreateMeet}
+                >
+                  Criar sala
+                </Button>
+              </Flex>
+            </Box>
           </Box>
         </ModalBody>
       </ModalContent>

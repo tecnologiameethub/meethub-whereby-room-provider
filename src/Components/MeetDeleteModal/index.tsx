@@ -40,7 +40,7 @@ export function MeetDeleteModal({ isOpen, onClose, meetId }: CreationModalProps)
               fontSize={'2xl'}
               mb={8}
             >
-              Você tem certeza quer exlcuir a sala?
+              Você tem certeza que quer exlcuir a sala?
             </Heading>
             <Flex
               justify={'space-between'}

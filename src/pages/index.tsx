@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { RiFileCopyLine } from 'react-icons/ri'
 import { TbTrash } from 'react-icons/tb'
 import { useQuery } from 'react-query'
+import { MeetCreateModal } from '../Components/MeetCreateModal'
 import { MeetDeleteModal } from '../Components/MeetDeleteModal'
 import { api } from '../services/api'
 
@@ -35,6 +36,11 @@ const Home: NextPage = () => {
   const [meetIdValue, setMeetIdValue] = useState('')
   const { onCopy } = useClipboard(urlValue)
   const { isOpen, onClose, onOpen } = useDisclosure()
+  const {
+    isOpen: isOpenCreateModal,
+    onClose: onCloseCreateModal,
+    onOpen: onOpenCreateModal
+  } = useDisclosure()
 
   const { data: allMeetings, isLoading } = useQuery('AllMeetings', async () => {
     const { data } = await api.get('/whereby/all')
@@ -110,7 +116,7 @@ const Home: NextPage = () => {
             }}
             color={'white'}
             size={'lg'}
-            onClick={onOpen}
+            onClick={onOpenCreateModal}
           >
             Adicionar sala
           </Button>
@@ -220,6 +226,7 @@ const Home: NextPage = () => {
         )}
       </Flex>
       <MeetDeleteModal isOpen={isOpen} onClose={onClose} meetId={meetIdValue} />
+      <MeetCreateModal isOpen={isOpenCreateModal} onClose={onCloseCreateModal} />
     </>
   )
 }
