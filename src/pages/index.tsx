@@ -1,9 +1,25 @@
-import { Box, Flex, Grid, IconButton, Image, Input, Spinner, Text, useClipboard } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  Heading,
+  IconButton,
+  Image,
+  Input,
+  Spinner,
+  Text,
+  useClipboard,
+  useDisclosure,
+  useToast
+} from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useState } from 'react'
 import { RiFileCopyLine } from 'react-icons/ri'
+import { TbTrash } from 'react-icons/tb'
 import { useQuery } from 'react-query'
+import { MeetDeleteModal } from '../Components/MeetDeleteModal'
 import { api } from '../services/api'
 
 type MeetingProps = {
@@ -14,7 +30,11 @@ type MeetingProps = {
 }
 
 const Home: NextPage = () => {
+  const toast = useToast()
   const [urlValue, setUrlValue] = useState('')
+  const [meetIdValue, setMeetIdValue] = useState('')
+  const { onCopy } = useClipboard(urlValue)
+  const { isOpen, onClose, onOpen } = useDisclosure()
 
   const { data: allMeetings, isLoading } = useQuery('AllMeetings', async () => {
     const { data } = await api.get('/whereby/all')
@@ -24,14 +44,48 @@ const Home: NextPage = () => {
     staleTime: 1000 * 60 * 15
   })
 
-  const { hasCopied, onCopy } = useClipboard(urlValue)
+  const handleClipboard = async (value: string) => {
+    async function handler() {
+      setUrlValue(value)
+      onCopy()
+      toast({
+        status: 'success',
+        title: 'Copiado',
+        duration: 750
+      })
+    }
+    await handler()
+  }
+
+  const handleFormatDate = (value: string) => {
+    return new Date(value).toLocaleDateString('pt-BR', {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: 'numeric',
+      minute: 'numeric'
+    })
+  }
+
+  const handleDeleteModal = async (value: string) => {
+    async function handler() {
+      setMeetIdValue(value)
+      onOpen()
+    }
+
+    await handler()
+  }
 
   return (
     <>
       <Head>
         <title>Meethub - Provedor de Salas Whereby</title>
       </Head>
-      <Box>
+      <Flex
+        direction={'column'}
+        margin={'0 auto'}
+        maxWidth={'1440px'}
+      >
         <Flex
           width={'100%'}
           justify={'center'}
@@ -44,6 +98,24 @@ const Home: NextPage = () => {
           />
         </Flex>
 
+        <Flex
+          width={'100%'}
+          justify={'flex-end'}
+          px={8}
+        >
+          <Button
+            bg={'blue.500'}
+            _hover={{
+              bg: 'blue.500'
+            }}
+            color={'white'}
+            size={'lg'}
+            onClick={onOpen}
+          >
+            Adicionar sala
+          </Button>
+        </Flex>
+
         {isLoading ? (
           <Flex
             width={'100%'}
@@ -54,11 +126,16 @@ const Home: NextPage = () => {
           </Flex>
         ) : (
           <Grid
-            templateColumns={'repeat(3, 1fr)'}
+            templateColumns={{
+              base: 'repeat(1, 1fr)',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(3, 1fr)',
+              xl: 'repeat(4, 1fr)',
+            }}
             p={8}
             gap={8}
           >
-            {allMeetings.reverse().map((meet: MeetingProps, id: number) => {
+            {allMeetings.slice(0).reverse().map((meet: MeetingProps, id: number) => {
               return (
                 <Box
                   key={id}
@@ -77,8 +154,38 @@ const Home: NextPage = () => {
                       {meet.meetingId}
                     </Text>
                   </Flex>
-                  <Text >{meet.startDate}</Text>
-                  <Text >{meet.endDate}</Text>
+                  <Flex
+                    w='100%'
+                    gap={8}
+                    my={4}
+                  >
+                    <Box>
+                      <Text
+                        color={'gray.400'}
+                      >
+                        Criação da sala
+                      </Text>
+                      <Heading
+                        fontSize={'lg'}
+                        fontWeight={'semibold'}
+                      >
+                        {handleFormatDate(meet.startDate)}
+                      </Heading>
+                    </Box>
+                    <Box>
+                      <Text
+                        color={'gray.400'}
+                      >
+                        Data do meet
+                      </Text>
+                      <Heading
+                        fontSize={'lg'}
+                        fontWeight={'semibold'}
+                      >
+                        {handleFormatDate(meet.endDate)}
+                      </Heading>
+                    </Box>
+                  </Flex>
                   <Flex
                     w='100%'
                     gap={4}
@@ -87,10 +194,22 @@ const Home: NextPage = () => {
                     <IconButton
                       aria-label='copy button'
                       icon={<RiFileCopyLine />}
-                      onClick={() => {
-                        setUrlValue(meet.roomUrl),
-                          onCopy()
+                      background={'blue.400'}
+                      _hover={{
+                        bg: 'blue.400'
                       }}
+                      color={'white'}
+                      onClick={() => handleClipboard(meet.roomUrl)}
+                    />
+                    <IconButton
+                      aria-label='copy button'
+                      icon={<TbTrash />}
+                      background={'red.400'}
+                      _hover={{
+                        bg: 'red.400'
+                      }}
+                      color={'white'}
+                      onClick={() => handleDeleteModal(meet.meetingId)}
                     />
                   </Flex>
                 </Box>
@@ -99,7 +218,8 @@ const Home: NextPage = () => {
             }
           </Grid>
         )}
-      </Box>
+      </Flex>
+      <MeetDeleteModal isOpen={isOpen} onClose={onClose} meetId={meetIdValue} />
     </>
   )
 }
